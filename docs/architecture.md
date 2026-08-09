@@ -64,3 +64,14 @@ passo, não uma decisão desta entrega.
 | CI/CD | GitHub Actions | Deploy manual | Consistência e rastreabilidade |
 | Réplicas | 2 pods | 1 pod | Disponibilidade mínima sem custo excessivo |
 | API | FastAPI (Python) | Node.js, Go, Java | Curva de aprendizado baixa, alta produtividade |
+
+## Pontos de melhoria
+
+Algumas melhorias podem ser consideradas em uma evolução da aplicação.
+
+| Melhoria | Benefício |
+| --- | --- |
+| **HTTPS / TLS** | Evita que dados como nome do cliente trafeguem em texto puro entre cliente e API |
+| **HPA (Horizontal Pod Autoscaler)** | Ajusta o número de Pods automaticamente conforme a demanda, sem depender de escala manual |
+| **Contact point no alerta do Grafana** | O alerta de taxa de erro já existe, mas hoje só fica visível na interface — falta notificação (e-mail/Slack) |
+| **Migrations com Alembic** | Hoje o schema é criado via `create_all()`, sem versionamento — dificulta evoluir o banco sem perder dados |
