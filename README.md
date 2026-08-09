@@ -1,90 +1,120 @@
-# move-tech-cloud-application-comp-3
+# Move Tech — Cloud Application
 
-Ponto de partida da **Competência 3 — Desenvolvimento e Operação de Aplicações (DevOps)**.
+Projeto desenvolvido durante a formação **Move Tech — Cloud Computing**, da Magalu Cloud em parceria com a Prósper Digital Skills.
 
-Este repositório é um template. Use-o como base para criar o seu próprio repositório e trabalhar na competência.
+A aplicação consiste em uma API de pedidos para um micro e-commerce, desenvolvida com **Python e FastAPI** e implantada na **Magalu Cloud**.
 
-> Parte do curso **Move Tech** — Magalu × Prósper Digital Skills  
-> Formação em Cloud Computing para iniciantes
+O projeto percorre o ciclo completo de uma aplicação em nuvem: containerização, persistência de dados, orquestração, CI/CD, observabilidade e documentação de arquitetura.
 
----
+## Arquitetura
 
-## O que tem aqui
+A aplicação é executada em containers Docker dentro de um cluster **K3s**, com duas réplicas da API. Os dados são persistidos em um **PostgreSQL gerenciado (DBaaS)** e as imagens da aplicação são armazenadas no **Container Registry da Magalu Cloud**.
 
-Uma API simples de micro e-commerce com pedidos e itens, construída em Python com FastAPI.
+O processo de entrega é automatizado pelo **GitHub Actions**, que executa os testes, constrói a imagem Docker, publica a imagem no registry e realiza o deploy no Kubernetes.
 
-A aplicação armazena os dados em memória. Ainda não tem deploy na nuvem — isso é exatamente o que você vai fazer nesta competência.
+A documentação completa da arquitetura está disponível em [`docs/architecture.md`](docs/architecture.md).
 
-### Endpoints disponíveis
+## Tecnologias
+
+- Python
+- FastAPI
+- Docker
+- Kubernetes / K3s
+- PostgreSQL / SQLAlchemy
+- Magalu Cloud
+- GitHub Actions
+- Prometheus
+- Grafana
+- PromQL
+
+## Funcionalidades da API
 
 | Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/health` | Verifica se a API está no ar |
+|---|---|---|
+| `GET` | `/health` | Verifica a saúde da aplicação |
 | `POST` | `/orders` | Cria um novo pedido |
-| `GET` | `/orders` | Lista todos os pedidos |
-| `GET` | `/orders/{id}` | Retorna um pedido com seus itens |
+| `GET` | `/orders` | Lista os pedidos |
+| `GET` | `/orders/{id}` | Retorna um pedido |
 | `DELETE` | `/orders/{id}` | Cancela um pedido |
 | `POST` | `/orders/{id}/items` | Adiciona um item ao pedido |
 | `GET` | `/orders/{id}/items` | Lista os itens de um pedido |
+| `GET` | `/metrics` | Expõe métricas para o Prometheus |
+
+## Observabilidade
+
+A aplicação utiliza **Prometheus e Grafana** para coleta e visualização de métricas.
+
+Foi criado um dashboard baseado nos **Golden Signals**, permitindo acompanhar:
+
+- **Tráfego:** taxa de requisições por segundo
+- **Erros:** taxa de respostas HTTP 4xx e 5xx
+- **Latência:** percentil 95 (P95) do tempo de resposta
+- **Saturação:** consumo de memória dos pods
+
+### Dashboard — Golden Signals
+
+![Dashboard Golden Signals](docs/images/grafana-golden-signals.png)
+
+Também foi configurada uma regra de alerta no Grafana para identificar quando a proporção de erros HTTP ultrapassa **5% por um período de 5 minutos**.
+
+### Alerta — Taxa de erros
+
+![Alerta de taxa de erros](docs/images/grafana-alerta.png)
+
+## CI/CD e Deploy
+
+O processo de entrega da aplicação é automatizado com **GitHub Actions**.
+
+O pipeline executa as seguintes etapas:
+
+1. Executa os testes automatizados com `pytest`
+2. Constrói a imagem Docker da aplicação
+3. Publica a imagem no **Container Registry da Magalu Cloud**
+4. Configura o acesso ao cluster Kubernetes
+5. Cria o Secret com a conexão do banco de dados
+6. Realiza o deploy da aplicação no **K3s**
+
+A aplicação é executada com **duas réplicas**, utilizando o Klipper ServiceLB para distribuir o tráfego e disponibilizar a API externamente.
+
+### Fluxo de entrega
+
+`Código → GitHub Actions → Docker Build → Container Registry → K3s → Aplicação`
+
+## Persistência de Dados
+
+A aplicação utiliza **PostgreSQL gerenciado (DBaaS) na Magalu Cloud** para persistência dos dados.
+
+O acesso ao banco é realizado pela aplicação utilizando **SQLAlchemy**, com a string de conexão fornecida ao cluster por meio de um Kubernetes Secret.
+
+O modelo possui duas entidades principais:
+
+- **Orders:** representa os pedidos realizados
+- **Items:** representa os itens associados a cada pedido
+
+A relação entre pedidos e itens é **1:N** — um pedido pode possuir vários itens.
+
+A modelagem completa está documentada em [`docs/data-model.md`](docs/data-model.md).
+
+## Documentação
+
+O repositório também contém a documentação das principais decisões e componentes da solução:
+
+- [`docs/architecture.md`](docs/architecture.md) — arquitetura, diagrama, requisitos não-funcionais, trade-offs e pontos de melhoria
+- [`docs/data-model.md`](docs/data-model.md) — modelagem e relacionamento dos dados
+- [`docs/adr/001-kubernetes-deploy.md`](docs/adr/001-kubernetes-deploy.md) — decisão pelo uso de K3s
+- [`docs/adr/002-dbaas-postgresql.md`](docs/adr/002-dbaas-postgresql.md) — decisão pelo uso de PostgreSQL gerenciado
 
 ---
 
-## O que você vai fazer nesta competência
+Projeto desenvolvido durante a formação **Move Tech — Cloud Computing**, da Magalu Cloud.
 
-Ao final da Competência 3, a aplicação deve estar **versionada, conteinerizada e publicada na Magalu Cloud**.
-
-- [ ] Publicar a imagem no Container Registry da Magalu Cloud
-- [ ] Criar o manifest Kubernetes (`k8s/app.yaml`)
-- [ ] Fazer o deploy no cluster Kubernetes da Magalu Cloud
-- [ ] Configurar o pipeline de CI/CD no GitHub Actions
+Aplicação baseada no tutorial **Construindo APIs robustas utilizando Python**, do LuizaLabs.
 
 ---
+## Sobre mim
 
-## O Dockerfile
+Sou Engenheira Química e estudante de Análise e Desenvolvimento de Sistemas, com foco em Análise de Dados.
 
-O repositório já inclui um `Dockerfile` pronto. Ele define como a aplicação é empacotada em uma imagem Docker:
+Gosto de criar soluções que organizam informações, automatizam processos e ajudam na tomada de decisão. Neste projeto, explorei também o universo de Cloud Computing, aplicando conceitos de containers, CI/CD, Kubernetes, banco de dados e observabilidade.
 
-```dockerfile
-FROM python:3.11-slim          # Imagem base com Python 3.11
-
-WORKDIR /app                   # Diretório de trabalho dentro do container
-
-RUN pip install poetry==1.8.3  # Instala o gerenciador de dependências
-
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.create false && \
-    poetry install --without dev --no-root  # Instala apenas as dependências de produção
-
-COPY app/ ./app/               # Copia o código da aplicação
-
-EXPOSE 8000                    # Porta que a aplicação vai escutar
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-O `docker-compose.yml` usa esse Dockerfile para construir e rodar a aplicação localmente. Na nuvem, o pipeline faz o mesmo — constrói a imagem e publica no registry.
-
-> **Referência:** [Dockerfile — Documentação oficial Docker](https://docs.docker.com/reference/dockerfile/)
-
----
-
-## Como rodar localmente
-
-**Pré-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado (Mac e Windows) ou [Docker Engine](https://docs.docker.com/engine/install/) (Linux).
-
-```bash
-docker compose up --build
-```
-
-Acesse a documentação interativa em: http://localhost:8000/docs
-
----
-
-## Próxima etapa
-
-Ao concluir esta competência, a solução de referência será publicada em:  
-[move-tech-cloud-application-comp-4](https://github.com/move-tech-cloud-computing/move-tech-cloud-application-comp-4)
-
----
-
-> Inspirado no tutorial [Construindo APIs robustas utilizando Python](https://github.com/luizalabs/tutorial-python-brasil) do LuizaLabs.
+Conheça meus outros projetos no [GitHub](https://github.com/mgabrielamnts).
